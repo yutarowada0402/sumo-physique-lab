@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   records,
+  meta,
   readFilters,
   filterRows,
   bmi,
@@ -15,22 +16,26 @@ import {
 } from "../src/data";
 const r = records[1];
 describe("統計と品質", () => {
-  it("初期対象は幕内十両70人、全階級は296人", () => {
+  it("初期対象と全階級がスナップショットに整合", () => {
     const f = readFilters(new URLSearchParams());
     expect(f.divisions).toEqual(["makuuchi", "juryo"]);
-    expect(filterRows(records, f)).toHaveLength(70);
-    expect(filterRows(records, f, true)).toHaveLength(296);
+    expect(filterRows(records, f)).toHaveLength(
+      meta.coverage.makuuchi + meta.coverage.juryo,
+    );
+    expect(filterRows(records, f, true)).toHaveLength(meta.count);
   });
-  it("IDは重複せず架空IDのみ", () => {
+  it("IDは重複せず、実データの出典を保持", () => {
     expect(new Set(records.map((r) => r.rikishi_id)).size).toBe(records.length);
     expect(
       records.every(
-        (r) => r.rikishi_id.startsWith("demo-") && r.source_url === null,
+        (r) =>
+          r.rikishi_id.startsWith("sumo-api-") &&
+          r.data_source_url.startsWith("https://sumo-api.com/"),
       ),
     ).toBe(true);
   });
   it("欠損・文字列・0勝0敗を勝率にしない", () => {
-    expect(winRate(records[0])).toBeNull();
+    expect(winRate({ ...r, career_wins: 0, career_losses: 0 })).toBeNull();
     expect(winRate({ ...r, career_wins: null })).toBeNull();
     expect(
       winRate({ ...r, career_wins: "50" } as unknown as Rikishi),
@@ -83,7 +88,8 @@ describe("統計と品質", () => {
   });
   it("改名はIDを変えず比較可能、年齢は基準日", () => {
     expect({ ...r, shikona: "改名（架空）" }.rikishi_id).toBe(r.rikishi_id);
-    expect(age({ ...r, birth_date: "2000-11-18" })).toBe(25);
+    expect(age({ ...r, birth_date: meta.reference_date })).toBe(0);
+    expect(age({ ...r, birth_date: "" })).toBeNull();
   });
   it("異常な大きな正数を勝手に切らず、欠損のみ除外", () => {
     expect(

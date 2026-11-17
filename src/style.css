@@ -1183,3 +1183,50 @@ header {
     letter-spacing: 1px;
   }
 }
+
+/* Compact data dashboard: headings and controls precede the charts. */
+.sidebar {
+  padding-top: 24px;
+}
+.sidebar nav {
+  margin-top: 28px;
+}
+.hero h1 {
+  font-size: 24px;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+.hero .snapshot {
+  margin-top: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 8px 20px;
+}
+.kpi {
+  background: #191b20;
+}
+.kpi:first-child {
+  border-top: 1px solid var(--border);
+}
+.panel-head h2 {
+  margin-top: 0;
+}
+.demo-badge {
+  color: #b9bdc6;
+  border-color: var(--border);
+  background: transparent;
+  letter-spacing: 0;
+}
+@media (max-width: 800px) {
+  .hero h1 {
+    font-size: 22px;
+    margin-top: 0;
+  }
+  .hero p {
+    font-size: 12px;
+  }
+  .hero .snapshot {
+    flex-direction: row;
+  }
+}

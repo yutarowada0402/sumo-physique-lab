@@ -65,7 +65,7 @@ import {
 } from "./data";
 import "./style.css";
 const routes = [
-  ["/", "Overview", Activity],
+  ["/", "概要", Activity],
   ["/physique", "体格分析", Scale],
   ["/performance", "体格 × 成績", BarChart3],
   ["/compare", "力士比較", GitCompareArrows],
@@ -110,13 +110,11 @@ const axis = (name: string) => ({
 });
 function Panel({
   title,
-  eyebrow,
   children,
   aside,
   className = "",
 }: {
   title: string;
-  eyebrow?: string;
   children: React.ReactNode;
   aside?: React.ReactNode;
   className?: string;
@@ -125,7 +123,6 @@ function Panel({
     <section className={`panel ${className}`}>
       <div className="panel-head">
         <div>
-          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
           <h2>{title}</h2>
         </div>
         {aside}
@@ -363,8 +360,8 @@ function DivisionPanel({ rows }: { rows: Rikishi[] }) {
   };
   return (
     <Panel
-      title="階級を越えて、体格を比べる。"
-      eyebrow="ALL 6 DIVISIONS"
+      title="階級別の体格"
+
       aside={
         <select
           aria-label="階級比較の統計"
@@ -460,7 +457,7 @@ function Ranking({
   return (
     <Panel
       title={short ? "体重ランキング · TOP 10" : "体格ランキング"}
-      eyebrow="PHYSIQUE RANKING"
+
       aside={
         short ? (
           <Link to={`/physique?${p}`}>
@@ -595,9 +592,7 @@ function KPIs({ rows }: { rows: Rikishi[] }) {
   return (
     <>
       <div className="section-label">
-        <span>
-          選択中の力士を知る <span className="subtle">/ SNAPSHOT</span>
-        </span>
+        <span>選択中の力士</span>
         <div className="segmented">
           {[
             ["mean", "平均"],
@@ -624,7 +619,6 @@ function KPIs({ rows }: { rows: Rikishi[] }) {
                   : "中央値"
                 : ""}
               {l}
-              <span>{["01", "02", "03", "04"][i]}</span>
             </div>
             <div className="kpi-number">
               {fmt(v, i === 0 || kind === "count" ? 0 : 1)}
@@ -668,8 +662,7 @@ function Notables({
   return (
     <>
       <div className="section-label">
-        <span>数字から見つける、注目力士</span>
-        <span className="subtle">IN FOCUS</span>
+        <span>体格の特徴</span>
       </div>
       <div className="notables">
         {[
@@ -862,14 +855,14 @@ function Performance({
           ≠ 因果。少ない取組数の高勝率にも注意してください。
         </p>
       </div>
-      <Panel title="体重と、生涯勝率の関連">
+      <Panel title="体重と生涯勝率">
         <Scatter rows={target} performance add={add} />
       </Panel>
-      <Panel title="身長と、生涯勝率の関連">
+      <Panel title="身長と生涯勝率">
         <Scatter rows={target} performance height add={add} />
       </Panel>
       <Panel
-        title="階級別の関連を確かめる"
+        title="階級別の相関"
         aside={
           <select
             aria-label="相関の測定指標"
@@ -981,7 +974,7 @@ function Compare({
     ["番付", (r) => r.rank_raw],
     ["階級", (r) => labels[r.division]],
     ["部屋", (r) => r.stable],
-    ["年齢", (r) => `${age(r)}歳`],
+    ["年齢", (r) => (finite(age(r)) ? `${age(r)}歳` : "—")],
     ["身長 cm", (r) => fmt(r.height_cm)],
     ["体重 kg", (r) => fmt(r.weight_kg)],
     ["BMI", (r) => fmt(bmi(r))],
@@ -991,7 +984,6 @@ function Compare({
         `${r.career_wins ?? "—"} / ${r.career_losses ?? "—"} / ${r.career_absences ?? "—"}`,
     ],
     ["生涯勝率 %", (r) => fmt(winRate(r) === null ? null : winRate(r)! * 100)],
-    ["最高位", (r) => r.highest_rank],
     [
       "公式プロフィール",
       (r) =>
@@ -1000,13 +992,13 @@ function Compare({
             公式を見る ↗
           </a>
         ) : (
-          "—（架空力士）"
+          "—"
         ),
     ],
   ];
   return (
     <>
-      <Panel title="自分だけの比較をつくる。" eyebrow="COMPARE 2–4 RIKISHI">
+      <Panel title="比較する力士を選択">
         <p className="caption">
           全階級から2〜4人を選択。共通フィルターに関係なく検索できます。
         </p>
@@ -1014,7 +1006,7 @@ function Compare({
           <Search size={17} />
           <input
             aria-label="比較する力士を検索"
-            placeholder="全階級から四股名・かなで検索"
+            placeholder="四股名・読み・ローマ字で検索"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -1055,7 +1047,7 @@ function Compare({
         </div>
       ) : (
         <>
-          <Panel title="体格の差を見てみよう">
+          <Panel title="身長・体重の差">
             <p className="caption">
               先頭の力士を基準とした差分。各測定の有効 n と除外を表示。
             </p>
@@ -1133,10 +1125,7 @@ function Compare({
                 </tbody>
               </table>
             </div>
-            <p className="caption">
-              成績基準: {meta.performance_as_of}
-              。架空力士に実在のプロフィールURLを結び付けません。
-            </p>
+            <p className="caption">成績基準: {meta.performance_as_of}。</p>
           </Panel>
         </>
       )}
@@ -1146,114 +1135,79 @@ function Compare({
 function Methodology() {
   return (
     <>
-      <Panel
-        title="データの出どころと、できること。"
-        eyebrow="DATA & METHODOLOGY"
-      >
-        <div className="info">
-          <Info />
-          <p>
-            本サイトは日本相撲協会の公式サービスではありません。現在は全件架空データです。体格
-            ≠ 筋力、相関 ≠ 因果。恣意的な強さスコアは作成しません。
-          </p>
-        </div>
+      <Panel title="データの出典">
         <dl>
-          <dt>データモード / 権利状態</dt>
-          <dd>DEMO / 架空データ · unconfirmed（条件未確認）</dd>
-          <dt>スナップショット</dt>
+          <dt>提供元</dt>
           <dd>
-            {meta.snapshot_id} · 基準日 {meta.reference_date}
+            <a href={meta.source_url} target="_blank" rel="noopener noreferrer">
+              Sumo API ↗
+            </a>
+            （非公式データベース）。日本相撲協会の公式サービスではありません。
           </dd>
-          <dt>取得日時（JST）</dt>
-          <dd>—（公式取得なし） / デモ生成 2026-11-17 09:00 JST</dd>
-          <dt>基準番付 / 成績時点</dt>
+          <dt>取得日時</dt>
           <dd>
-            {meta.banzuke_basho}
-            <br />
+            {new Date(meta.retrieved_at_utc).toLocaleString("ja-JP", {
+              timeZone: "Asia/Tokyo",
+            })}{" "}
+            JST
+          </dd>
+          <dt>番付・プロフィール</dt>
+          <dd>
+            {meta.banzuke_basho}。提供元更新日：
+            {meta.profile_updated_min.slice(0, 10)} 〜{" "}
+            {meta.profile_updated_max.slice(0, 10)}
+            。古い情報が含まれる場合があります。
+          </dd>
+          <dt>成績</dt>
+          <dd>
             {meta.performance_as_of}
+            。各力士のAPI通算成績を使用し、休場は勝率の分母に含めません。取組の確定時点はAPIからは確認できません。
           </dd>
-          <dt>取得方法・公開範囲</dt>
+          <dt>対象と欠損</dt>
           <dd>
-            固定seedによる合成。氏名、番付、部屋、成績を含めて架空。公式の個票・集計・画像・HTMLは配布していません。
-          </dd>
-          <dt>一次ソース候補</dt>
-          <dd>
-            {[
-              "ResultRikishiData/search/",
-              "ResultBanzuke/table/",
-              "ResultRikishiData/profile/4099/",
-              "ResultRikishiData/profile/3367/",
-              "ResultRikishiDataDaicho/search/",
-            ].map((s) => (
-              <p key={s}>
-                <a
-                  href={`https://www.sumo.or.jp/${s}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  日本相撲協会 / {s} ↗
-                </a>
-              </p>
-            ))}
-          </dd>
-          <dt>公開判断の根拠（2026-11-17確認）</dt>
-          <dd>
-            検索・番付ページのHTML取得を確認しましたが、プロフィールに429が返ったため追加アクセスを停止。robots.txtの取得、正式API、転載・自動アクセス許諾は確認できず、実データ公開は保留。出典表示は許諾を意味しません。詳細はリポジトリの
-            docs/data-rights.md。
+            APIが現役として返した6階級の力士。協会の番付人数との照合は未実施です。出身地は提供元表記を使用。読みがない場合はローマ字名でも検索できます。最高位は未取得です。
           </dd>
         </dl>
       </Panel>
-      <Panel title="カバレッジ（DEMO合成件数）">
-        <p className="caption">
-          公式の対象人数・取得成功人数は全階級とも未確認。下表は合成レコードの検証結果です。
-        </p>
+      <Panel title="データ収録状況">
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>階級</th>
-                <th>公式期待人数</th>
-                <th>合成発見 / 解析</th>
-                <th>身長体重有効</th>
-                <th>勝敗有効</th>
-                <th>除外対象</th>
+                <th>収録人数</th>
+                <th>身長・体重あり</th>
+                <th>通算勝敗あり</th>
               </tr>
             </thead>
             <tbody>
               {divisions.map((d) => {
-                const r = records.filter((r) => r.division === d);
+                const rs = records.filter((r) => r.division === d);
                 return (
                   <tr key={d}>
                     <th>{labels[d]}</th>
-                    <td>未確認</td>
-                    <td>
-                      {r.length} / {r.length}
-                    </td>
+                    <td>{rs.length}</td>
                     <td>
                       {
-                        r.filter(
+                        rs.filter(
                           (r) => positive(r.height_cm) && positive(r.weight_kg),
                         ).length
                       }
                     </td>
                     <td>
                       {
-                        r.filter(
+                        rs.filter(
                           (r) =>
                             finite(r.career_wins) && finite(r.career_losses),
                         ).length
                       }
                     </td>
-                    <td>0（合成）</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-        <p>
-          付出・番付外は対象に含めていません。公式での掲載状況・人数は未確認です。引退力士・親方も対象外です。0勝0敗は勝敗有効件数に含みますが勝率は欠損になります。
-        </p>
       </Panel>
       <Panel title="指標と欠損の定義">
         <dl>
@@ -1359,30 +1313,14 @@ function App() {
             SUMO<span>PHYSIQUE LAB</span>
           </span>
         </Link>
-        <div className="sidebar-label">大相撲フィジカル研究所</div>
-        <div className="nav-label">WORKSPACE</div>
         <nav>
-          {routes.map(([path, label, Icon], i) => (
+          {routes.map(([path, label, Icon]) => (
             <NavLink key={path} to={`${path}?${query}`} end={path === "/"}>
               <Icon size={19} />
               <span>{label}</span>
-              <small>{String(i + 1).padStart(2, "0")}</small>
             </NavLink>
           ))}
-          <span className="disabled-nav">
-            <BarChart3 size={19} /> 決まり手分析 <small>準備中</small>
-          </span>
         </nav>
-        <div className="sidebar-bottom">
-          <FlaskConical size={24} />
-          <strong>数字でひらく、相撲の見方。</strong>
-          <p>
-            体格と競技成績を、
-            <br />
-            ひとつずつ丁寧に読み解く。
-          </p>
-          <span>VERSION 1.0 · DEMO</span>
-        </div>
       </aside>
       <div className="shell">
         <header>
@@ -1392,7 +1330,7 @@ function App() {
             <strong>{title}</strong>
           </div>
           <span className="demo-badge">
-            <i /> DEMO / 架空データ
+            <i /> 実データ / Sumo API
           </span>
         </header>
         <nav className="mobile-nav">
@@ -1404,43 +1342,27 @@ function App() {
         </nav>
         <main id="main" tabIndex={-1}>
           <div className="hero">
-            <div className="eyebrow">
-              <span className="red-rule" /> THE SCIENCE OF SUMO
-            </div>
-            <div className="hero-line">
-              <div>
-                <h1>
-                  {loc.pathname === "/" ? (
-                    <>
-                      関取の体格を、
-                      <br className="mobile-break" />
-                      データで見る<span>。</span>
-                    </>
-                  ) : (
-                    title
-                  )}
-                </h1>
-                <p>
-                  {loc.pathname === "/"
-                    ? "土俵の上の個性を、身長・体重・競技成績から読み解く。"
-                    : "体格と競技成績を、同じ基準で丁寧に比べる。"}
-                </p>
-              </div>
-              <div className="hero-stamp">
-                <span>架空番付</span>
-                <strong>
-                  2026<span> / </span>11
-                </strong>
-                <small>SNAPSHOT · DEMO</small>
-              </div>
-            </div>
+            <h1>{title}</h1>
+            <p>
+              {loc.pathname === "/"
+                ? "力士の身長・体重と通算成績を確認できます。"
+                : loc.pathname === "/compare"
+                  ? "2〜4人のプロフィールと成績を比較できます。"
+                  : loc.pathname === "/methodology"
+                    ? "出典、取得日時、指標の計算方法。"
+                    : "階級や力士名で絞り込めます。"}
+            </p>
             <div className="snapshot">
-              <span>
-                <i /> {meta.banzuke_basho}
-              </span>
-              <span>公式取得なし · デモ生成 2026.11.17 09:00 JST</span>
+              <span>取得日：{meta.reference_date}</span>
+              <span>収録：{records.length}人</span>
+              <a
+                href={meta.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                出典：Sumo API ↗
+              </a>
             </div>
-            <p className="caption">成績基準：{meta.performance_as_of}</p>
           </div>
           {!["/compare", "/methodology"].includes(loc.pathname) && (
             <section className="filters" aria-label="共通フィルター">
@@ -1577,7 +1499,7 @@ function App() {
                   {f.divisions.map((d) => labels[d]).join("・") || "階級未選択"}{" "}
                   <strong>{rows.length}人</strong>
                 </span>
-                <span>すべて架空の力士・測定値です</span>
+                <span>出典：Sumo API</span>
               </div>
             </section>
           )}
@@ -1585,15 +1507,15 @@ function App() {
             <>
               <KPIs rows={rows} />
               <Panel
-                title="身長と体重に、個性が見える。"
-                eyebrow="HEIGHT × WEIGHT"
+                title="身長と体重"
+
                 aside={<span className="tag">選択中の階級</span>}
               >
                 <Scatter rows={rows} add={add} />
               </Panel>
               <Panel
-                title="体重と成績、その関係は？"
-                eyebrow="WEIGHT × CAREER WIN RATE"
+                title="体重と生涯勝率"
+
                 aside={
                   <Link to={`/performance?${query}`}>
                     詳しく分析 <ArrowUpRight size={16} />
@@ -1662,16 +1584,14 @@ function App() {
             </Panel>
           ) : (
             <div className="empty">
-              ページが見つかりません。<Link to="/">Overviewへ</Link>
+              ページが見つかりません。<Link to="/">概要へ</Link>
             </div>
           )}
           <footer>
             <span>
               SUMO PHYSIQUE LAB <small>大相撲フィジカル研究所</small>
             </span>
-            <p>
-              DEMO / 架空データ · 非公式サービス · 体格 ≠ 筋力 / 相関 ≠ 因果
-            </p>
+            <p>出典：Sumo API · 非公式サイト</p>
             <Link to={`/methodology?${query}`}>データと定義 ↗</Link>
           </footer>
         </main>
@@ -1716,7 +1636,7 @@ class AppBoundary extends React.Component<
   render() {
     return this.state.failed ? (
       <main>
-        <span className="demo-badge">DEMO / 架空データ</span>
+        <span className="demo-badge">実データ / Sumo API</span>
         <h1>データの表示に失敗しました</h1>
         <p>
           読み込み又は描画に失敗しました。0値として表示はしません。ページを再読み込みしてください。

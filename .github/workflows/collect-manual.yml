@@ -1,12 +1,19 @@
-name: Official collection (blocked)
+name: Collect Sumo API snapshot
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  rights-gate:
+  collect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fail closed before network or writes
-        run: python pipeline/collect.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pipeline.collect
+      - run: python pipeline/validate.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sumo-api-snapshot
+          path: data/real/snapshot.json

@@ -1,14 +1,25 @@
 import fs from "node:fs";
-const mode = process.env.VITE_DATA_MODE || "demo";
-if (mode !== "demo") {
+const mode = process.env.VITE_DATA_MODE || "real";
+if (mode !== "real") {
   console.error(
-    "Official mode is unavailable: permission, collector and coverage must all be reviewed before implementation.",
+    "This release uses the Sumo API real-data snapshot. VITE_DATA_MODE must be real.",
   );
   process.exit(1);
 }
-const r = JSON.parse(fs.readFileSync("data/rights.json", "utf8"));
-if (r.status !== "unconfirmed") {
-  console.error("Rights changes require review; this release is demo only.");
+const snapshot = JSON.parse(fs.readFileSync("data/real/snapshot.json", "utf8"));
+if (
+  snapshot.meta.data_mode !== "real" ||
+  !snapshot.records.length ||
+  snapshot.records.length !== snapshot.meta.count ||
+  !snapshot.records.every(
+    (r) =>
+      r.rikishi_id.startsWith("sumo-api-") &&
+      r.data_source_url.startsWith("https://sumo-api.com/api/rikishi/"),
+  )
+) {
+  console.error("Invalid or mixed-source snapshot.");
   process.exit(1);
 }
-console.log("DEMO gate passed: synthetic records only.");
+console.log(
+  `Sumo API snapshot: ${snapshot.records.length} records, retrieved ${snapshot.meta.reference_date}`,
+);

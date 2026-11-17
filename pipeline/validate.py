@@ -1,4 +1,4 @@
-"""Validate synthetic snapshots without discarding suspicious records."""
+"""Validate snapshots without discarding suspicious records."""
 import json
 import math
 from pathlib import Path
@@ -21,6 +21,6 @@ def validate(rows):
     if len({r.get("performance_as_of") for r in rows}) > 1: errors.append("inconsistent performance_as_of")
     return {"errors": errors, "warnings": warnings, "count": len(rows)}
 if __name__ == "__main__":
-    report = validate(json.loads(Path("data/demo/rikishi_demo.json").read_text()))
+    report = validate(json.loads(Path("data/real/snapshot.json").read_text())["records"])
     print(json.dumps(report, ensure_ascii=False, indent=2))
     raise SystemExit(bool(report["errors"]))

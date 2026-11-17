@@ -1,6 +1,5 @@
-import raw from "../data/demo/rikishi_demo.json";
-import meta from "../data/demo/manifest.json";
-export { meta };
+import snapshot from "../data/real/snapshot.json";
+export const meta = snapshot.meta;
 export const divisions = [
   "makuuchi",
   "juryo",
@@ -26,10 +25,30 @@ export const colors: Record<Division, string> = {
   jonidan: "#85a68e",
   jonokuchi: "#b99b83",
 };
-export type Rikishi = Omit<(typeof raw)[number], "division"> & {
+export type Rikishi = {
+  rikishi_id: string;
+  shikona: string;
+  shikona_kana: string;
+  rank_raw: string;
   division: Division;
+  stable: string;
+  birthplace: string;
+  birth_date: string;
+  height_cm: number | null;
+  weight_kg: number | null;
+  highest_rank: string;
+  source_url: string | null;
+  career_wins: number | null;
+  career_losses: number | null;
+  career_absences: number | null;
+  career_basho: number | null;
+  makuuchi_wins: number | null;
+  makuuchi_losses: number | null;
+  performance_as_of: string;
+  profile_updated_at: string | null;
+  data_source_url: string;
 };
-export const records = raw as Rikishi[];
+export const records = snapshot.records as Rikishi[];
 export const finite = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v);
 export const positive = (v: unknown): v is number => finite(v) && v > 0;
@@ -48,6 +67,7 @@ export const winRate = (r: Rikishi) =>
 export const age = (r: Rikishi) => {
   const b = new Date(r.birth_date),
     a = new Date(meta.reference_date);
+  if (!Number.isFinite(b.getTime()) || b > a) return null;
   return (
     a.getUTCFullYear() -
     b.getUTCFullYear() -

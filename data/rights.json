@@ -1,8 +1,9 @@
 {
-  "status": "unconfirmed",
+  "status": "public_api",
   "checked_at": "2026-11-17",
-  "automated_access": false,
-  "individual_publication": false,
-  "aggregate_publication": false,
-  "reason": "Profile returned HTTP 429; further requests stopped. Permission unresolved."
+  "source": "https://sumo-api.com/",
+  "access_policy": "https://sumo-api.com/api-guide",
+  "automated_access": true,
+  "reason": "The provider documents a free public API. Import factual numeric fields and names with attribution; no images, prose, or HTML. This does not claim a license from the Japan Sumo Association.",
+  "official_site_scraping": false
 }

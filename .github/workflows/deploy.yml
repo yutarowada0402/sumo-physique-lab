@@ -1,4 +1,4 @@
-name: Deploy DEMO to GitHub Pages
+name: Deploy to GitHub Pages
 on:
   workflow_dispatch:
   push:
@@ -28,7 +28,7 @@ jobs:
       - run: python pipeline/validate.py
       - run: npm run build
         env:
-          VITE_DATA_MODE: demo
+          VITE_DATA_MODE: real
           BASE_PATH: /${{ github.event.repository.name }}/
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

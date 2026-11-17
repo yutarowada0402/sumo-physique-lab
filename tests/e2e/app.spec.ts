@@ -1,4 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+const { records, meta } = JSON.parse(
+  readFileSync("data/real/snapshot.json", "utf8"),
+) as {
+  records: { shikona: string; division: string }[];
+  meta: { count: number; coverage: Record<string, number> };
+};
 async function open(page: Page, url: string) {
   await page.goto(url);
   await page.locator("h1").click({ force: true });
@@ -11,11 +18,12 @@ test("初期対象、フィルター、戻る、比較、直リンク", async ({
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await open(page, "./");
-  await expect(
-    page.getByRole("heading", { name: /関取の体格を、\s*データで見る。/ }),
-  ).toBeVisible();
-  await expect(page.locator(".filter-summary")).toContainText("70人");
-  await expect(page.locator(".demo-badge")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "概要" })).toBeVisible();
+  await expect(page.locator(".filter-summary")).toContainText(
+    `${meta.coverage.makuuchi + meta.coverage.juryo}人`,
+  );
+  await expect(page.locator(".demo-badge")).toContainText("Sumo API");
+  await expect(page.locator("main")).not.toContainText("架空");
   const quick = page.getByRole("button", { name: "全階級", exact: true });
   // Dispatch inputs directly: this static UI has no transitions.
   // Verify resulting URLs/data; headless frame scheduling may otherwise idle.
@@ -23,10 +31,14 @@ test("初期対象、フィルター、戻る、比較、直リンク", async ({
   await expect(quick).toBeEnabled();
   if (isMobile) await quick.tap({ force: true });
   else await quick.click({ force: true });
-  await expect(page.locator(".filter-summary")).toContainText("296人");
+  await expect(page.locator(".filter-summary")).toContainText(
+    `${meta.count}人`,
+  );
   await expect(page).toHaveURL(/divisions=makuuchi/);
   await page.goBack();
-  await expect(page.locator(".filter-summary")).toContainText("70人");
+  await expect(page.locator(".filter-summary")).toContainText(
+    `${meta.coverage.makuuchi + meta.coverage.juryo}人`,
+  );
   await page.locator(".chart").first().locator("svg").waitFor();
   const point = page
     .locator(".chart")
@@ -38,7 +50,9 @@ test("初期対象、フィルター、戻る、比較、直リンク", async ({
   await expect(page.locator(".compare-tray")).toContainText("1/4");
   await open(page, "./#/compare");
   await expect(page.getByText("比較対象はまだありません。")).toBeVisible();
-  await page.getByRole("textbox", { name: "比較する力士を検索" }).fill("紫雲");
+  await page
+    .getByRole("textbox", { name: "比較する力士を検索" })
+    .fill(records.find((r) => r.division === "jonokuchi")!.shikona);
   await expect(page.locator(".candidate-list")).toContainText("序ノ口");
   await page.getByRole("textbox", { name: "比較する力士を検索" }).fill("");
   for (let i = 0; i < 4; i++) {
@@ -57,14 +71,16 @@ test("初期対象、フィルター、戻る、比較、直リンク", async ({
   await expect(
     page.getByRole("heading", { name: "体格の分布", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".filter-summary")).toContainText("28人");
+  await expect(page.locator(".filter-summary")).toContainText(
+    `${meta.coverage.juryo}人`,
+  );
   await open(page, "./#/performance");
   await expect(
     page.getByText("相関 ≠ 因果。", { exact: false }),
   ).not.toHaveCount(0);
   await open(page, "./#/methodology");
   await expect(
-    page.getByRole("heading", { name: "カバレッジ（DEMO合成件数）" }),
+    page.getByRole("heading", { name: "データ収録状況" }),
   ).toBeVisible();
   expect(errors).toEqual([]);
   expect(
