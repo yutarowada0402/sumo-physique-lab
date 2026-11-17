@@ -2,6 +2,8 @@
 
 大相撲フィジカル研究所。React + TypeScript + Vite + Apache ECharts の静的ダッシュボード。**DEMO / 全件架空データ**。非公式サービスです。
 
+公開先: https://yutarowada0402.github.io/sumo-physique-lab/ （DEMO）
+
 ## 起動と検証
 
 Node.js 22、npm、Python 3.12以上を推奨。

@@ -41,11 +41,13 @@ test("初期対象、フィルター、戻る、比較、直リンク", async ({
   await page.getByRole("textbox", { name: "比較する力士を検索" }).fill("紫雲");
   await expect(page.locator(".candidate-list")).toContainText("序ノ口");
   await page.getByRole("textbox", { name: "比較する力士を検索" }).fill("");
-  for (let i = 0; i < 4; i++)
+  for (let i = 0; i < 4; i++) {
     await page
       .locator(".candidate-list>button:enabled")
       .first()
       .click({ force: true });
+    await expect(page.locator(".compare-tray")).toContainText(`${i + 1}/4`);
+  }
   await expect(page.locator(".compare-tray")).toContainText("4/4");
   await expect(page.locator(".candidate-list>button:enabled")).toHaveCount(0);
   await expect(
