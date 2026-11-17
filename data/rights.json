@@ -1,0 +1,8 @@
+{
+  "status": "unconfirmed",
+  "checked_at": "2026-11-17",
+  "automated_access": false,
+  "individual_publication": false,
+  "aggregate_publication": false,
+  "reason": "Profile returned HTTP 429; further requests stopped. Permission unresolved."
+}

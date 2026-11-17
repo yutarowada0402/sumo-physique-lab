@@ -1,0 +1,62 @@
+[
+  {
+    "division": "makuuchi",
+    "expected_count_if_known": null,
+    "discovered_count": 42,
+    "parsed_count": 42,
+    "physique_count": 40,
+    "performance_count": 41,
+    "excluded_count": 0,
+    "data_mode": "demo"
+  },
+  {
+    "division": "juryo",
+    "expected_count_if_known": null,
+    "discovered_count": 28,
+    "parsed_count": 28,
+    "physique_count": 26,
+    "performance_count": 27,
+    "excluded_count": 0,
+    "data_mode": "demo"
+  },
+  {
+    "division": "makushita",
+    "expected_count_if_known": null,
+    "discovered_count": 60,
+    "parsed_count": 60,
+    "physique_count": 58,
+    "performance_count": 59,
+    "excluded_count": 0,
+    "data_mode": "demo"
+  },
+  {
+    "division": "sandanme",
+    "expected_count_if_known": null,
+    "discovered_count": 70,
+    "parsed_count": 70,
+    "physique_count": 68,
+    "performance_count": 69,
+    "excluded_count": 0,
+    "data_mode": "demo"
+  },
+  {
+    "division": "jonidan",
+    "expected_count_if_known": null,
+    "discovered_count": 72,
+    "parsed_count": 72,
+    "physique_count": 70,
+    "performance_count": 71,
+    "excluded_count": 0,
+    "data_mode": "demo"
+  },
+  {
+    "division": "jonokuchi",
+    "expected_count_if_known": null,
+    "discovered_count": 24,
+    "parsed_count": 24,
+    "physique_count": 22,
+    "performance_count": 23,
+    "excluded_count": 0,
+    "data_mode": "demo"
+  }
+]
